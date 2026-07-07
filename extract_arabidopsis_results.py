@@ -1,6 +1,6 @@
 import pandas as pd
 
-input_file_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/train_data_entity_count_tax_df.csv"
+input_file_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/train_data_entity_count_tax_df.csv"
 iptm_file_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_training_A.csv"
 # iptm_file_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_A_2.csv"
 

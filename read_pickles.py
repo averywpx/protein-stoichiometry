@@ -192,108 +192,108 @@ for dp in DATA_TYPE:
     #     print(f"Length of entity_count_df: {len(entity_count_df)}")
     #     print(f"Length of homomeric complex: {len(complex_df)}")
 
-    # elif task == "generate fasta":
-    #     json_list = []
-    #     fasta_data = ""
-    #     # print(entity_count_df)
-    #     complex_df = entity_count_df[entity_count_df["counts"]<=2]
-    #     print(f"Length of complex df :{len(complex_df)}")
-    #     # ave_sequence_len = complex_df["amino acid length"].mean()
-    #     # print(f"Average length of sequence :{ave_sequence_len}")
-    #     for index, row in complex_df.iterrows():
-    #         sequences = row["sequences"]
-    #         name = row["name"]
+    elif task == "generate fasta":
+        json_list = []
+        fasta_data = ""
+        # print(entity_count_df)
+        complex_df = entity_count_df[entity_count_df["counts"]<=2]
+        print(f"Length of complex df :{len(complex_df)}")
+        # ave_sequence_len = complex_df["amino acid length"].mean()
+        # print(f"Average length of sequence :{ave_sequence_len}")
+        for index, row in complex_df.iterrows():
+            sequences = row["sequences"]
+            name = row["name"]
             
-    #         for idx, s in enumerate(sequences):
-    #             if idx == 0:
-    #                 data = ">"+name+"_A"+"\n"+s+"\n"
-    #                 fasta_data+=data
-    #             elif idx == 1:
-    #                 data = ">"+name+"_B"+"\n"+s+"\n"
-    #                 fasta_data+=data
+            for idx, s in enumerate(sequences):
+                if idx == 0:
+                    data = ">"+name+"_A"+"\n"+s+"\n"
+                    fasta_data+=data
+                elif idx == 1:
+                    data = ">"+name+"_B"+"\n"+s+"\n"
+                    fasta_data+=data
 
-    #         # sequence_length = row["amino acid length"]
-    #         # possible_combinations = 1000//sequence_length
-    #         # for i in range(possible_combinations):
-    #         #     sequence_dict={}
-    #         #     sequence_dict["sequences"]=[
-    #         #         {
-    #         #             "proteinChain":{
-    #         #                 "sequence": sequence,
-    #         #                 "count": i+1
-    #         #             }
-    #         #         }
-    #         #     ]
-    #         #     sequence_dict["name"]=f"{name}_{i+1}"
-    #         #     json_list+=[sequence_dict]
-    #         # generate content of fasta file
+            # sequence_length = row["amino acid length"]
+            # possible_combinations = 1000//sequence_length
+            # for i in range(possible_combinations):
+            #     sequence_dict={}
+            #     sequence_dict["sequences"]=[
+            #         {
+            #             "proteinChain":{
+            #                 "sequence": sequence,
+            #                 "count": i+1
+            #             }
+            #         }
+            #     ]
+            #     sequence_dict["name"]=f"{name}_{i+1}"
+            #     json_list+=[sequence_dict]
+            # generate content of fasta file
             
         
-    #     # write fasta file
-    #     with open(fasta_output_path, "wt") as fasta_file:
-    #         fasta_file.write(fasta_data)
-    #     # print(f"Length of possible protein combination: {len(json_list)}")
-    #     # with open(json_output_path, "w") as json_file:
-    #     #     json.dump(json_list, json_file, indent=4)
-    # else:
-    #     # with open(sequence_identity_input_id_path,"r") as file:
-    #     #     raw_less_similar_sequence_id = [line.strip()[1:-2] for line in file]
-    #     #     less_similar_sequence_id = list(set(raw_less_similar_sequence_id))
-    #     #     print(f"Sequence identity filter: {len(less_similar_sequence_id)}")
+        # write fasta file
+        with open(fasta_output_path, "wt") as fasta_file:
+            fasta_file.write(fasta_data)
+        # print(f"Length of possible protein combination: {len(json_list)}")
+        # with open(json_output_path, "w") as json_file:
+        #     json.dump(json_list, json_file, indent=4)
+    else:
+        # with open(sequence_identity_input_id_path,"r") as file:
+        #     raw_less_similar_sequence_id = [line.strip()[1:-2] for line in file]
+        #     less_similar_sequence_id = list(set(raw_less_similar_sequence_id))
+        #     print(f"Sequence identity filter: {len(less_similar_sequence_id)}")
             
-    #     # with open(sequence_identity_input_id_homo_path,"r") as file:
-    #     #     less_similar_sequence_id_homo = [line.strip()[1:] for line in file]
-    #     #     print(f"Sequence identity filter (homo): {len(less_similar_sequence_id_homo)}")
+        # with open(sequence_identity_input_id_homo_path,"r") as file:
+        #     less_similar_sequence_id_homo = [line.strip()[1:] for line in file]
+        #     print(f"Sequence identity filter (homo): {len(less_similar_sequence_id_homo)}")
 
-    #     with open(valid_data_homo_json_output_path, "r") as file:
-    #         raw_protein_list = json.load(file)
-    #         less_similar_sequence_id_A=[]
-    #         for d in raw_protein_list:
-    #             name = d["name"]
-    #             less_similar_sequence_id_A+=[name]
-    #         print(f"Sequence identity filter: {len(less_similar_sequence_id_A)}")
+        with open(valid_data_homo_json_output_path, "r") as file:
+            raw_protein_list = json.load(file)
+            less_similar_sequence_id_A=[]
+            for d in raw_protein_list:
+                name = d["name"]
+                less_similar_sequence_id_A+=[name]
+            print(f"Sequence identity filter: {len(less_similar_sequence_id_A)}")
 
             
-    #     json_list = []
-    #     id_counts=0
+        json_list = []
+        id_counts=0
 
-    #     complex_df = entity_count_df[entity_count_df["counts"]<=2]
-    #     print(f"Length of complex df :{len(complex_df)}")
-    #     # print(f"Number of proteins sequence with similarity lower than 0.5: {len(less_similar_sequence_id)}")
-    #     ave_sequence_len = complex_df["amino acid length"].mean()
-    #     print(f"Average length of sequence :{ave_sequence_len}")
+        complex_df = entity_count_df[entity_count_df["counts"]<=2]
+        print(f"Length of complex df :{len(complex_df)}")
+        # print(f"Number of proteins sequence with similarity lower than 0.5: {len(less_similar_sequence_id)}")
+        ave_sequence_len = complex_df["amino acid length"].mean()
+        print(f"Average length of sequence :{ave_sequence_len}")
 
 
-    #     for index, row in complex_df.iterrows():
-    #         sequences = row["sequences"]
-    #         name = row["name"]
+        for index, row in complex_df.iterrows():
+            sequences = row["sequences"]
+            name = row["name"]
             
-    #         # if name in less_similar_sequence_id and name not in less_similar_sequence_id_homo:
-    #         if name not in less_similar_sequence_id_A:
-    #             # sequence_length = row["amino acid length"]
-    #             # possible_combinations = 1000//sequence_length
-    #             # for i in range(possible_combinations):
-    #             sequence_dicts=[]
-    #             for s in sequences:
-    #                 sequence_dict = {
-    #                     "proteinChain":{
-    #                         "sequence": s,
-    #                         "count": 1
-    #                     }
-    #                 }
-    #                 sequence_dicts+=[sequence_dict]
+            # if name in less_similar_sequence_id and name not in less_similar_sequence_id_homo:
+            if name not in less_similar_sequence_id_A:
+                # sequence_length = row["amino acid length"]
+                # possible_combinations = 1000//sequence_length
+                # for i in range(possible_combinations):
+                sequence_dicts=[]
+                for s in sequences:
+                    sequence_dict = {
+                        "proteinChain":{
+                            "sequence": s,
+                            "count": 1
+                        }
+                    }
+                    sequence_dicts+=[sequence_dict]
                 
-    #             protein_dict={}
-    #             protein_dict["sequences"]=sequence_dicts
-    #             protein_dict["name"]=name
-    #             json_list+=[protein_dict]
-    #             # id_counts+=1
-    #     # print(f"Number of proteins with similarity lower than 0.5:{id_counts}")
+                protein_dict={}
+                protein_dict["sequences"]=sequence_dicts
+                protein_dict["name"]=name
+                json_list+=[protein_dict]
+                # id_counts+=1
+        # print(f"Number of proteins with similarity lower than 0.5:{id_counts}")
             
-    #     # # write json file
-    #     print(f"Length of possible protein combination: {len(json_list)}")
-    #     with open(json_output_path, "w") as json_file:
-    #         json.dump(json_list, json_file, indent=4)
+        # # write json file
+        print(f"Length of possible protein combination: {len(json_list)}")
+        with open(json_output_path, "w") as json_file:
+            json.dump(json_list, json_file, indent=4)
     
 
 
