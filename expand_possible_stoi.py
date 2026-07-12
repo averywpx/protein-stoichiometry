@@ -23,6 +23,8 @@ from tqdm import tqdm
 # for athan proteins
 input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_with_msa/athan_900_short_protein_complexes-update-msa.json"
 output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_athan_900_mixed_proteins.json"
+# for uniprot dimer
+### remember to remove AMINO_ACID_LEN_LIMIT
 
 AMINO_ACID_LEN_LIMIT = 1000
 

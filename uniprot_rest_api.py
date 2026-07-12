@@ -8,6 +8,7 @@ import re
 pdb_athan_entity_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/train_data_entity_count_tax_arath_df.csv"
 pdb_athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/train_data_pdb_uniprot_arath_df.csv"
 tair_athan_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/tair_arath_df.csv"
+# Temporarily retrive 1200 proteins from uniprot one by one
 athan_uniprot_df_path_1200 = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df_1200.csv"
 athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df.csv"
 
@@ -79,6 +80,8 @@ def loci_to_uniprot_dict_df(locus_ids, reviewed_only=False):
 
     return pd.DataFrame(rows)
 
+### remove the semicolumn in xref_tair 
+### save as csv rather than tsv
 def download_uniprot_arabidopsis(
     output=athan_uniprot_df_path
 ):

@@ -7,7 +7,10 @@ athan_short_sequence_fa_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/raw_
 mmseqs_input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/mmseqs_list/seq_id_less_than_0.5_athan.list"
 entity_df_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/tair_arath_df.csv"
 json_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_short_protein_complexes.json"
+homodimer_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/uniprot_homodimer_protein_complexes.json"
+# Testing dataset for the first round prediction
 json_900_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
+athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df.csv"
 
 
 def read_lst(path):
@@ -59,47 +62,77 @@ def read_lst(path):
 # # print(df.head())
 # # print(df.shape)
 
-# df = pd.read_csv(entity_df_output_path)
+entity_df = pd.read_csv(entity_df_output_path)
+### Convert this file to csv or change name to tsv
+athan_uniprot_df = pd.read_csv(athan_uniprot_df_path, sep="\t")
+athan_uniprot_df["TAIR"] = athan_uniprot_df["TAIR"].str[:-1]
+athan_uniprot_df = athan_uniprot_df[athan_uniprot_df['Subunit structure'].notna()]
 
-# # filter df using mmseqs list
+# filter out proteins in uniprot that are also in tair
+loci_list = list(set(entity_df["locus"].tolist()))
+# There is no duplicated tair id in this dataset
+uniprot_tair_df = athan_uniprot_df[(athan_uniprot_df["TAIR"].isin(loci_list))&(athan_uniprot_df["Reviewed"]=="reviewed")]
+homodimer_uniprot_tair_df = uniprot_tair_df[uniprot_tair_df["Subunit structure"].str.contains("homodimer|Homodimer")]
+homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.rename(columns={'TAIR':'locus', 'Sequence': 'sequence'})
+# print(len(homodimer_uniprot_tair_df))
+# print(len(homodimer_uniprot_tair_df[homodimer_uniprot_tair_df.duplicated(subset=['locus'],keep=False)]))
+
+homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.merge(entity_df[["locus", "sequence", "protein_id"]], how="left", on=["locus", "sequence"])
+homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.drop_duplicates(subset=["locus", "sequence"], keep='first')
+
+
+
+
+# # filter out proteins in tair df that also in uniprot
+# uniprot_list_extra = list(set(athan_uniprot_df[athan_uniprot_df["Reviewed"]=="reviewed"]["TAIR"].tolist()))
+# uniprot_list = [str(x)[:-1] for x in uniprot_list_extra]
+# uniprot_tair_df = entity_df[entity_df["locus"].isin(uniprot_list)]
+# len(uniprot_tair_df)
+
+
+# # filter entity_df using mmseqs list
 # mmseqs_lst = list(set(read_lst(mmseqs_input_path)))
 # print(len(mmseqs_lst))
-# mmseqs_df = df[df["protein_id"].isin(mmseqs_lst)]
+# mmseqs_entity_df = entity_df[entity_df["protein_id"].isin(mmseqs_lst)]
 
-# json_list=[]
-# for index, row in mmseqs_df.iterrows():
-#     sequence = row["sequence"]
-#     name = row["protein_id"]
+
+json_list=[]
+for index, row in homodimer_uniprot_tair_df.iterrows():
+# for index, row in mmseqs_entity_df.iterrows():
+    sequence = row["sequence"]
+    name = row["protein_id"]
    
-#     sequence_dicts=[]
+    sequence_dicts=[]
     
-#     sequence_dict = {
-#         "proteinChain":{
-#             "sequence": sequence,
-#             "count": 1
-#         }
-#     }
-#     sequence_dicts+=[sequence_dict]
+    sequence_dict = {
+        "proteinChain":{
+            "sequence": sequence,
+            "count": 1
+        }
+    }
+    sequence_dicts+=[sequence_dict]
         
-#     protein_dict={}
-#     protein_dict["sequences"]=sequence_dicts
-#     protein_dict["name"]=name
-#     json_list+=[protein_dict]
+    protein_dict={}
+    protein_dict["sequences"]=sequence_dicts
+    protein_dict["name"]=name
+    json_list+=[protein_dict]
 
-# # # write json file
-# print(f"Length of possible protein combination: {len(json_list)}")
+# # write json file
+print(f"Length of possible protein combination: {len(json_list)}")
 
+### convert generating json format code into a function
+with open(homodimer_output_path, "w") as json_file:
 # with open(json_output_path, "w") as json_file:
-#     json.dump(json_list, json_file, indent=4)
+    json.dump(json_list, json_file, indent=4)
 
 
-# TEMPORARY CODE: get the first 900 proteins of json_list
-with open(json_output_path, "r") as f:
-    data = json.load(f)
+# # TEMPORARY CODE: get the first 900 proteins of json_list
+# with open(json_output_path, "r") as f:
+#     data = json.load(f)
 
-json_900 = data[:900]
+# json_900 = data[:900]
 
-with open(json_900_output_path, "w") as json_file:
-    json.dump(json_900, json_file, indent=4)
+# with open(json_900_output_path, "w") as json_file:
+#     json.dump(json_900, json_file, indent=4)
 
-print(len(json_900))
+# print(len(json_900))
