@@ -2,12 +2,14 @@ import requests
 import pandas as pd
 from io import StringIO
 import time
+from tqdm import tqdm
+import re
 
 pdb_athan_entity_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/train_data_entity_count_tax_arath_df.csv"
 pdb_athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/train_data_pdb_uniprot_arath_df.csv"
 tair_athan_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/tair_arath_df.csv"
 athan_uniprot_df_path_1200 = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df_1200.csv"
-
+athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df.csv"
 
 # Search uniprot using single locus from TAIR
 def transcript_to_uniprot(transcript_id):
@@ -77,17 +79,114 @@ def loci_to_uniprot_dict_df(locus_ids, reviewed_only=False):
 
     return pd.DataFrame(rows)
 
-# def get_uniprot_sequence(accession):
-#     url = f"https://rest.uniprot.org/uniprotkb/{accession}.fasta"
+def download_uniprot_arabidopsis(
+    output=athan_uniprot_df_path
+):
 
-#     response = requests.get(url)
-#     response.raise_for_status()
+    base_url = "https://rest.uniprot.org/uniprotkb/search"
 
-#     # Remove FASTA header and join sequence lines
-#     lines = response.text.strip().split("\n")
-#     sequence = "".join(lines[1:])
+    params = {
+        "query": "organism_id:3702",
+        "format": "tsv",
+        "fields": (
+            "accession,id,reviewed,xref_tair,"
+            "cc_subunit,length,sequence"
+        ),
+        "size": 500
+    }
 
-#     return sequence
+    session = requests.Session()
+
+    dfs = []
+    url = base_url
+    progress_bar = None
+
+    while url:
+
+        for attempt in range(5):
+
+            try:
+
+                response = session.get(
+                    url,
+                    params=params if url == base_url else None,
+                    timeout=60
+                )
+
+                response.raise_for_status()
+
+                break
+
+            except requests.exceptions.RequestException as e:
+
+                print(
+                    f"Attempt {attempt + 1} failed: {e}"
+                )
+
+                time.sleep(5 * (attempt + 1))
+
+        else:
+
+            raise RuntimeError(
+                "Download failed after 5 retries"
+            )
+
+        # Get total number of records from first response
+        if progress_bar is None:
+
+            total = int(
+                response.headers.get(
+                    "x-total-results",
+                    0
+                )
+            )
+
+            progress_bar = tqdm(
+                total=total,
+                desc="Downloading UniProt",
+                unit="proteins"
+            )
+
+        # Convert current page to DataFrame
+        page_df = pd.read_csv(
+            StringIO(response.text),
+            sep="\t"
+        )
+
+        dfs.append(page_df)
+
+        # Update progress bar
+        progress_bar.update(len(page_df))
+
+        # Find next page
+        match = re.search(
+            r'<([^>]+)>;\s*rel="next"',
+            response.headers.get("Link", "")
+        )
+
+        url = match.group(1) if match else None
+
+        # params are already included in next URL
+        params = None
+
+    progress_bar.close()
+
+    # Combine all pages
+    result = pd.concat(
+        dfs,
+        ignore_index=True
+    )
+
+    # Save
+    result.to_csv(
+        output,
+        sep="\t",
+        index=False
+    )
+
+    return result
+
+
 
 
 # Get uniprot info using accession id in pdb
@@ -111,43 +210,22 @@ def get_uniprot_sequence(accession):
         return None
 
 
+# # Get uniprot info using tair locus id
+# result = transcript_to_uniprot("AT2G40940.1")
+# print(result)
 
-# # def download_athan_from_uniprot():
-uniprot_url = "https://rest.uniprot.org/uniprotkb/stream"
+# # Save uniprot info to df
+# tair_athan_df = pd.read_csv(tair_athan_df_path)
+# locus_ids = tair_athan_df["locus"].tolist()
+# # locus_ids_1200 = ["ATCG00500", "ATCG00510", "AT2G40940"]
+# locus_ids_1200 = locus_ids[:1200]
 
-params = {
-    "query": "organism_id:3702",
-    "format": "tsv",
-    "fields": "accession,id,reviewed,xref_tair,cc_subunit,length, sequence"
-}
-
-response = requests.get(uniprot_url, params=params)
-response.raise_for_status()
-
-print(f"Response: {response.text}")
-
-uniprot_df = pd.read_csv(
-    StringIO(response.text),
-    sep="\t"
-)
-    # return uniprot_df
-
-# uniprot_df = download_athan_from_uniprot()
-
-# print(uniprot_df.head())
-# print(uniprot_df["Reviewed"].value_counts())
-
-# uniprot_df.to_csv(
-#     athan_uniprot_df_path,
-#     sep="\t",
-#     index=False
-# )
+# uniprot_df_1200 = loci_to_uniprot_dict_df(locus_ids_1200, reviewed_only=False)
+# uniprot_df_1200.to_csv(athan_uniprot_df_path_1200, index=False)
 
 
+# # Get uniprot info using accession ids from pdb
 
-
-# seq = get_uniprot_sequence("['Q9LVM1']")
-# print(seq)
 
 # # Use db_accessions in pdb to add uniprot sequence field
 # pdb_athan_entity_df = pd.read_csv(pdb_athan_entity_df_path)
@@ -157,6 +235,9 @@ uniprot_df = pd.read_csv(
 # )
 
 # # WARNING: Q9LVM1 did download uniprot_sequence
+# seq = get_uniprot_sequence("['Q9LVM1']")
+# print(seq)
+
 # pdb_athan_entity_dimer_df = pd.read_csv(pdb_athan_uniprot_df_path)
 
 # test_df = pdb_athan_entity_dimer_df[pdb_athan_entity_dimer_df["pdbx_db_accessions"].str.contains("Q9FN03")]
@@ -169,15 +250,4 @@ uniprot_df = pd.read_csv(
 # pdb_athan_entity_dimer_df.to_csv(pdb_athan_uniprot_df_path, index=False)
 
 
-# # Get uniprot id and subunit info using tair locus id
-# result = transcript_to_uniprot("AT2G40940.1")
-# print(result)
-
-# # Save uniprot info to df
-# tair_athan_df = pd.read_csv(tair_athan_df_path)
-# locus_ids = tair_athan_df["locus"].tolist()
-# # locus_ids_1200 = ["ATCG00500", "ATCG00510", "AT2G40940"]
-# locus_ids_1200 = locus_ids[:1200]
-
-# uniprot_df_1200 = loci_to_uniprot_dict_df(locus_ids_1200, reviewed_only=False)
-# uniprot_df_1200.to_csv(athan_uniprot_df_path_1200, index=False)
+uniprot_df = download_uniprot_arabidopsis()

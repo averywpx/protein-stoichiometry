@@ -7,6 +7,8 @@ athan_short_sequence_fa_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/raw_
 mmseqs_input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/mmseqs_list/seq_id_less_than_0.5_athan.list"
 entity_df_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/tair_arath_df.csv"
 json_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_short_protein_complexes.json"
+json_900_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
+
 
 def read_lst(path):
     with open(path, "r") as file:
@@ -57,49 +59,47 @@ def read_lst(path):
 # # print(df.head())
 # # print(df.shape)
 
-df = pd.read_csv(entity_df_output_path)
+# df = pd.read_csv(entity_df_output_path)
 
-# filter df using mmseqs list
-mmseqs_lst = list(set(read_lst(mmseqs_input_path)))
-print(len(mmseqs_lst))
-mmseqs_df = df[df["protein_id"].isin(mmseqs_lst)]
+# # filter df using mmseqs list
+# mmseqs_lst = list(set(read_lst(mmseqs_input_path)))
+# print(len(mmseqs_lst))
+# mmseqs_df = df[df["protein_id"].isin(mmseqs_lst)]
 
-json_list=[]
-for index, row in mmseqs_df.iterrows():
-    sequence = row["sequence"]
-    name = row["protein_id"]
+# json_list=[]
+# for index, row in mmseqs_df.iterrows():
+#     sequence = row["sequence"]
+#     name = row["protein_id"]
    
-    sequence_dicts=[]
+#     sequence_dicts=[]
     
-    sequence_dict = {
-        "proteinChain":{
-            "sequence": sequence,
-            "count": 1
-        }
-    }
-    sequence_dicts+=[sequence_dict]
+#     sequence_dict = {
+#         "proteinChain":{
+#             "sequence": sequence,
+#             "count": 1
+#         }
+#     }
+#     sequence_dicts+=[sequence_dict]
         
-    protein_dict={}
-    protein_dict["sequences"]=sequence_dicts
-    protein_dict["name"]=name
-    json_list+=[protein_dict]
+#     protein_dict={}
+#     protein_dict["sequences"]=sequence_dicts
+#     protein_dict["name"]=name
+#     json_list+=[protein_dict]
 
-# # write json file
-print(f"Length of possible protein combination: {len(json_list)}")
+# # # write json file
+# print(f"Length of possible protein combination: {len(json_list)}")
 
-with open(json_output_path, "w") as json_file:
-    json.dump(json_list, json_file, indent=4)
+# with open(json_output_path, "w") as json_file:
+#     json.dump(json_list, json_file, indent=4)
 
 
+# TEMPORARY CODE: get the first 900 proteins of json_list
+with open(json_output_path, "r") as f:
+    data = json.load(f)
 
-# {
-#         "sequences": [
-#             {
-#                 "proteinChain": {
-#                     "sequence": "MVREKVKVSTRTLQWKCVESKRDSKRLYYGRFILSPLMKGQADTIGIAMRRALLGEIEGTCITRAKSENIPHDYSNIAGIQESVHEILMNLNEIVLRSNLYGTRNALICVQGPGYITARDIILPPAVEIIDNTQHIATLTEPIDLCIELKIERNRGYSLKMSNNFEDRSYPIDAVFMPVENANHSIHSYGNGNEKQEILFLEIWTNGSLTPKEALHQASRNLINLFIPFLHVEEETFYLENNQHQVTLPFFPFHNRLVNLRKKKKTKELAFQYIFIDQLELPPRIYNCLKKSNIHTLLDLLNNSQEDLIKIEHFHVEDVKKILDILEKK",
-#                     "count": 1
-#                 }
-#             }
-#         ],
-#         "name": "ATCG00740.1"
-#     },
+json_900 = data[:900]
+
+with open(json_900_output_path, "w") as json_file:
+    json.dump(json_900, json_file, indent=4)
+
+print(len(json_900))

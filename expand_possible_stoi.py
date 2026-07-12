@@ -14,14 +14,15 @@ from tqdm import tqdm
 
 
 # for valid dataset
-A_input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/StoPred_intermediate_results/homomeric_protein_complexes_valid_dataset-add-msa.json"
+# A_input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/StoPred_intermediate_results/homomeric_protein_complexes_valid_dataset-add-msa.json"
 # output_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_dataset_protenix_homomeric_complex.json"
 # for valid dataset AAB
-AB_input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/protein_complexes_AB_valid_data-add-msa.json"
-output_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_dataset_protenix_AAB_complex.json"
+# AB_input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/protein_complexes_AB_valid_data-add-msa.json"
+# output_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_dataset_protenix_AAB_complex.json"
 
-
-
+# for athan proteins
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_with_msa/athan_900_short_protein_complexes-update-msa.json"
+output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_athan_900_mixed_proteins.json"
 
 AMINO_ACID_LEN_LIMIT = 1000
 
@@ -43,16 +44,23 @@ def expand_possible_stoi(s_lens):
     return possible_combinations
 
 
-with open(A_input_path, "r") as file:
-    protein_list_A = json.load(file)
-    print(len(protein_list_A))
+# with open(A_input_path, "r") as file:
+#     protein_list_A = json.load(file)
+#     print(len(protein_list_A))
 
 
-### WARNING: there are some As in this list
-with open(AB_input_path, "r") as file:
-    protein_list_AB = json.load(file)
+# ### WARNING: there are some As in this list
+# with open(AB_input_path, "r") as file:
+#     protein_list_AB = json.load(file)
 
-protein_list = protein_list_A + protein_list_AB
+# protein_list = protein_list_A + protein_list_AB
+# total_proteins = len(protein_list)
+# print(f"Before: {total_proteins}")
+
+with open(input_path, "r") as file:
+    protein_list = json.load(file)
+    print(len(protein_list))
+
 total_proteins = len(protein_list)
 print(f"Before: {total_proteins}")
 
@@ -72,13 +80,21 @@ for p in tqdm(protein_list, total=total_proteins):
     # if count < 1000:
     sequences_dict = p["sequences"]
     sequences=[]
-    msas=[]
+    # msas=[]
+    paired_msa_paths=[]
+    unpaired_msa_paths=[]
     for s in sequences_dict:
         sequence = s["proteinChain"]["sequence"]
-        msa=s["proteinChain"]["msa"]
+        # msa=s["proteinChain"]["msa"]
+        paired_msa_path=s["proteinChain"]["pairedMsaPath"]
+        unpaired_msa_path=s["proteinChain"]["unpairedMsaPath"]
+
         sequences+=[sequence]
-        msas+=[msa]
-    # estimate if there are other possible stoichiometry
+        paired_msa_paths+=[paired_msa_path]
+        unpaired_msa_paths+=[unpaired_msa_path]
+        # msas+=[msa]
+
+    # Estimate if there are other possible stoichiometry
     # sequence = p["sequences"][0]["proteinChain"]["sequence"]
     name = p["name"]
     # s_len = len(sequence)
@@ -95,12 +111,22 @@ for p in tqdm(protein_list, total=total_proteins):
                 
                 order=pc[0]
                 new_dict={}
+                # new_dict["sequences"]=[
+                #     {
+                #         "proteinChain":{
+                #             "sequence": sequences[0],
+                #             "count": order,
+                #             "msa": msas[0]
+                #         }
+                #     }
+                # ]
                 new_dict["sequences"]=[
                     {
                         "proteinChain":{
                             "sequence": sequences[0],
                             "count": order,
-                            "msa": msas[0]
+                            "pairedMsaPath": paired_msa_paths[0],
+                            "unpairedMsaPath": unpaired_msa_paths[0]
                         }
                     }
                 ]

@@ -3,8 +3,12 @@ import subprocess
 
 # wc -l == 6739
 START_INDEX=6737
+DATA_TYPE="athan_mixed_v1.0.0"
 
-input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/protenix_training_AAB.json"
+# input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/protenix_training_AAB.json"
+
+# For athan proteins
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_athan_900_mixed_proteins.json"
 
 with open(input_path, "r") as file:
     unrun_protein_list = json.load(file)
@@ -22,7 +26,7 @@ with open(input_path, "r") as file:
 # unrun_protein_list = protein_list[START_INDEX:]
 
 
-chunk_number = 60
+chunk_number = 21
 chunk_size = len(unrun_protein_list)//chunk_number
 
 chunk_list = []
@@ -36,7 +40,8 @@ for i in range(chunk_number+1):
     # print(protein_list_chunk[-1])
     p_len = len(protein_list_chunk)
     # print(p_len)
-    with open(f"/lustre/grp/gyqlab/wangpx/data/StoPred_data/protenix_training_AAB_json/protenix_training_AAB_{order}.json", "w") as f:
+    # Generate sliced jsons
+    with open(f"/storage/gaoyiqinLab/wangpeixin/work/protenix_sh_scripts/protenix_athan_900_mixed_{order}.json", "w") as f:
         json.dump(protein_list_chunk, f, indent=4)
         
     # else:
@@ -49,7 +54,7 @@ for i in range(chunk_number+1):
         #     json.dump(protein_list_chunk, f, indent=4)
 
     # submit jobs
-    result = subprocess.run(["bash", "/lustre/grp/gyqlab/wangpx/work/submit_protenix_job.sh", str(order)], capture_output=True, text=True)
+    result = subprocess.run(["bash", "/storage/gaoyiqinLab/wangpeixin/scripts/protein-stoichiometry/submit_protenix_job.sh", DATA_TYPE, str(order)], capture_output=True, text=True)
     print("Stdout:", result.stdout)
     print("Stderr:", result.stderr)
     print("Return code:", result.returncode)
