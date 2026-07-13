@@ -10,6 +10,7 @@ json_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_dat
 homodimer_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/uniprot_homodimer_protein_complexes.json"
 # Testing dataset for the first round prediction
 json_900_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
+"/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
 athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df.csv"
 
 
@@ -71,13 +72,15 @@ athan_uniprot_df = athan_uniprot_df[athan_uniprot_df['Subunit structure'].notna(
 # filter out proteins in uniprot that are also in tair
 loci_list = list(set(entity_df["locus"].tolist()))
 # There is no duplicated tair id in this dataset
-uniprot_tair_df = athan_uniprot_df[(athan_uniprot_df["TAIR"].isin(loci_list))&(athan_uniprot_df["Reviewed"]=="reviewed")]
+# uniprot_tair_df = athan_uniprot_df[(athan_uniprot_df["TAIR"].isin(loci_list))&(athan_uniprot_df["Reviewed"]=="reviewed")]
+uniprot_tair_df = athan_uniprot_df[(athan_uniprot_df["Reviewed"]=="reviewed")]
 homodimer_uniprot_tair_df = uniprot_tair_df[uniprot_tair_df["Subunit structure"].str.contains("homodimer|Homodimer")]
 homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.rename(columns={'TAIR':'locus', 'Sequence': 'sequence'})
 # print(len(homodimer_uniprot_tair_df))
 # print(len(homodimer_uniprot_tair_df[homodimer_uniprot_tair_df.duplicated(subset=['locus'],keep=False)]))
 
-homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.merge(entity_df[["locus", "sequence", "protein_id"]], how="left", on=["locus", "sequence"])
+homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.merge(entity_df[["locus", "sequence", "protein_id"]], how="inner", on=["locus", "sequence"])
+# homodimer_uniprot_tair_df[homodimer_uniprot_tair_df['protein_id'].isna()]
 homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.drop_duplicates(subset=["locus", "sequence"], keep='first')
 
 
@@ -127,12 +130,18 @@ with open(homodimer_output_path, "w") as json_file:
 
 
 # # TEMPORARY CODE: get the first 900 proteins of json_list
-# with open(json_output_path, "r") as f:
-#     data = json.load(f)
+with open(json_900_output_path, "r") as f:
+    data = json.load(f)
 
 # json_900 = data[:900]
 
 # with open(json_900_output_path, "w") as json_file:
 #     json.dump(json_900, json_file, indent=4)
+
+names=[]
+for d in data:
+    name = d["name"]
+    names += [name]
+print(len(names))
 
 # print(len(json_900))
