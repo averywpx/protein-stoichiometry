@@ -11,14 +11,23 @@ AMINO_ACID_LEN_LIMIT = 1000
 
 # input_path = "/lustre/grp/gyqlab/wangpx/protenix2/base_1_output_training_AAB/*"
 
-input_path = "/lustre/grp/gyqlab/wangpx/protenix2/base_1_output_valid_data/*"
+# input_path = "/lustre/grp/gyqlab/wangpx/protenix2/base_1_output_valid_data/*"
 
 # input_path = "/lustre/grp/gyqlab/wangpx/protenix2/base_1_output_valid_AAB/*"
+
+# Athan mix
+# input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_output/base_1_output_athan_900/*"
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_output/base_1_output_homodimer_athan_900_v1/*"
 
 # train entity df
 # entity_df_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/train_data_entity_count_df.csv"
 # # valid entity df
-entity_df_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_data_entity_count_df.csv"
+# entity_df_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_data_entity_count_df.csv"
+# tair 34 entity df
+entity_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/homodimer_uniprot_tair_arath_df.csv"
+
+
+
 
 
 
@@ -29,10 +38,20 @@ entity_df_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_data_entity_
 # iptm_csv_intermediate_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_training_AAB_intermediate.csv"
 
 # # valid A
-iptm_csv_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_A_2.csv"
+# iptm_csv_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_A_2.csv"
 # # valid AAB
 # iptm_csv_intermediate_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_AAB_intermediate.csv"
 # iptm_csv_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_AAB.csv"
+
+
+# athan mixed
+# iptm_csv_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/results/StoPred_result_analysis/result_df_filterd_by_iptm_athan_mixed_900.csv"
+# iptm_csv_intermediate_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/results/StoPred_result_analysis/result_df_filterd_by_iptm_athan_mixed_900_intermediate.csv"
+iptm_csv_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/results/StoPred_result_analysis/result_df_filterd_by_iptm_athan_mixed_homodimer_900_v1.csv"
+iptm_csv_intermediate_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/results/StoPred_result_analysis/result_df_filterd_by_iptm_athan_mixed_homodimer_900_intermediate_v1.csv"
+
+
+
 
 
 
@@ -56,8 +75,13 @@ for p in paths:
     # if count <= 50:
     uid = p.split("/")[-1]
     split_name = uid.split("_")
-    name = "_".join(split_name[:2])
-    if len(split_name[2:]) == 1:
+    name=split_name[0]
+    # name = "_".join(split_name[:2])
+    # print(split_name)
+    if len(split_name) == 2:
+        pred_stoi = f"A{split_name[1]}"
+        subunit_count=1
+    elif len(split_name[2:]) == 1:
         pred_stoi = f"A{split_name[2]}"
         subunit_count=1
     elif len(split_name[2:]) == 2:
@@ -96,13 +120,22 @@ print(f"Number of possible complex after remove top1 iptm <=0.5: {len(result_df)
 protein_counts_2 = result_df["name"].nunique()
 print(f"Number of proteins after remove top1 iptm <=0.5: {protein_counts_2}")
 
-# result_df.to_csv(iptm_csv_intermediate_path, index=False)
+result_df.to_csv(iptm_csv_intermediate_path, index=False)
 
 # add correct stoi
 # with open("/lustre/grp/gyqlab/wangpx/data/StoPred_data/StoPred_raw_data/train_data.pkl", "rb") as f:
 #         input_dict=pickle.load(f)
 entity_df = pd.read_csv(entity_df_path)
+entity_df = entity_df.rename(columns={'protein_id':'name'})
+entity_df_lst = entity_df["name"].tolist()
 entity_df = entity_df.set_index(["name"])
+### WARNING: find a way to annotate stoichiometry in uniprot
+
+entity_df["stoichiometry"] = "A2"
+
+# result_df = result_df[result_df["name"].isin(entity_df_lst)]
+print(len(result_df))
+print(result_df["name"].nunique())
 
 correct_counts=[]
 stoichiometries=[]
@@ -112,7 +145,8 @@ for index, row in result_df.iterrows():
     name = row["name"]
     correct_row = entity_df.loc[name]
     correct_stoi = correct_row["stoichiometry"]
-    amino_acid_length = correct_row["amino acid length"]
+    amino_acid_length = correct_row["Length"]
+    # amino_acid_length = correct_row["amino acid length"]
     stoichiometries+=[correct_stoi]
     amino_acid_lengths+=[amino_acid_length]
     correct_count= int(correct_stoi[1:])

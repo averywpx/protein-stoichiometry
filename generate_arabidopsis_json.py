@@ -6,12 +6,17 @@ arabidopsis_fa_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/raw_data/Arab
 athan_short_sequence_fa_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/raw_data/Arabidopsis/Athaliana_447_Araport11_short.protein.fa"
 mmseqs_input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/mmseqs_list/seq_id_less_than_0.5_athan.list"
 entity_df_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/tair_arath_df.csv"
+homodimer_uniprot_tair_entity_df_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/homodimer_uniprot_tair_arath_df.csv"
 json_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_short_protein_complexes.json"
 homodimer_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/uniprot_homodimer_protein_complexes.json"
 # Testing dataset for the first round prediction
 json_900_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
 "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/athan_900_short_protein_complexes.json"
 athan_uniprot_df_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/entity_df/uniprot_arath_df.csv"
+homodimer_uniprot_tair_id_lst_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/go_enrichment_analysis/homodimer_uniprot_tair_transcript.list"
+homodimer_uniprot_tair_loci_lst_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/go_enrichment_analysis/homodimer_uniprot_tair_loci.list"
+homodimer_uniprot_tair_accession_lst_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/go_enrichment_analysis/homodimer_uniprot_tair_accession.list"
+homodimer_json_900_output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_without_msa/homodimer_athan_900_short_protein_complexes.json"
 
 
 def read_lst(path):
@@ -82,8 +87,21 @@ homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.rename(columns={'TAIR':'lo
 homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.merge(entity_df[["locus", "sequence", "protein_id"]], how="inner", on=["locus", "sequence"])
 # homodimer_uniprot_tair_df[homodimer_uniprot_tair_df['protein_id'].isna()]
 homodimer_uniprot_tair_df = homodimer_uniprot_tair_df.drop_duplicates(subset=["locus", "sequence"], keep='first')
+homodimer_uniprot_tair_df.to_csv(homodimer_uniprot_tair_entity_df_output_path, index=False)
+print(len(homodimer_uniprot_tair_df))
+# homodimer_uniprot_tair_loci_lst = homodimer_uniprot_tair_df["locus"].tolist()
+# with open(homodimer_uniprot_tair_loci_lst_path, 'w') as file:
+#     file.write('\n'.join(homodimer_uniprot_tair_loci_lst) + '\n')
 
+# homodimer_uniprot_tair_id_lst = homodimer_uniprot_tair_df["protein_id"].tolist()
+# with open(homodimer_uniprot_tair_id_lst_path, 'w') as file:
+#     file.write('\n'.join(homodimer_uniprot_tair_id_lst) + '\n')
 
+# homodimer_uniprot_tair_accession_lst = homodimer_uniprot_tair_df["Entry"].tolist()
+# with open(homodimer_uniprot_tair_accession_lst_path, 'w') as file:
+#     file.write('\n'.join(homodimer_uniprot_tair_accession_lst) + '\n')
+print(f"Max length: {homodimer_uniprot_tair_df['Length'].max()}")
+print(f"Average length {homodimer_uniprot_tair_df['Length'].mean()}")
 
 
 # # filter out proteins in tair df that also in uniprot
@@ -123,25 +141,28 @@ for index, row in homodimer_uniprot_tair_df.iterrows():
 # # write json file
 print(f"Length of possible protein combination: {len(json_list)}")
 
-### convert generating json format code into a function
-with open(homodimer_output_path, "w") as json_file:
-# with open(json_output_path, "w") as json_file:
-    json.dump(json_list, json_file, indent=4)
+
+# ### convert generating json format code into a function
+# with open(homodimer_output_path, "w") as json_file:
+# # with open(json_output_path, "w") as json_file:
+#     json.dump(json_list, json_file, indent=4)
 
 
 # # TEMPORARY CODE: get the first 900 proteins of json_list
-with open(json_900_output_path, "r") as f:
+with open(json_output_path, "r") as f:
     data = json.load(f)
 
-# json_900 = data[:900]
+json_900 = data[:900]
 
-# with open(json_900_output_path, "w") as json_file:
+# with open(homodimer_json_900_output_path, "w") as json_file:
 #     json.dump(json_900, json_file, indent=4)
 
-names=[]
-for d in data:
-    name = d["name"]
-    names += [name]
-print(len(names))
+# names=[]
+# for d in data:
+#     name = d["name"]
+#     names += [name]
+# print(len(names))
 
 # print(len(json_900))
+# print(json_900[-1])
+# last one should be AT4G37970.1 

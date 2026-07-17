@@ -3,12 +3,12 @@ import subprocess
 
 # wc -l == 6739
 START_INDEX=6737
-DATA_TYPE="athan_mixed_v1.0.0"
+DATA_TYPE="homodimer_athan_mixed_v0.5.0"
 
 # input_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/protenix_training_AAB.json"
 
 # For athan proteins
-input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_athan_900_mixed_proteins.json"
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_homodimer_athan_mixed_proteins.json"
 
 with open(input_path, "r") as file:
     unrun_protein_list = json.load(file)
@@ -41,7 +41,7 @@ for i in range(chunk_number+1):
     p_len = len(protein_list_chunk)
     # print(p_len)
     # Generate sliced jsons
-    with open(f"/storage/gaoyiqinLab/wangpeixin/work/protenix_sh_scripts/protenix_athan_900_mixed_{order}.json", "w") as f:
+    with open(f"/storage/gaoyiqinLab/wangpeixin/work/protenix_sh_scripts/protenix_homodiemr_athan_mixed_{order}.json", "w") as f:
         json.dump(protein_list_chunk, f, indent=4)
         
     # else:

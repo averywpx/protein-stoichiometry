@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # training A
-input_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_training_A.csv"
+# input_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_training_A.csv"
 # training AAB
 # input_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_training_AAB.csv"
 
@@ -12,11 +12,17 @@ input_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result
 # # valid AAB
 # input_path = "/lustre/grp/gyqlab/wangpx/protenix2/StoPred_result_analysis/result_df_filterd_by_iptm_valid_AAB.csv"
 
+# athan mixed
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/results/StoPred_result_analysis/result_df_filterd_by_iptm_athan_mixed_900_v1.csv"
+
+
 ref_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/train_data_entity_count_tax_df_after_20210930.csv"
 
 
-dataset_type = "Training Dataset"
+# dataset_type = "Training Dataset"
 # dataset_type = "Validation Dataset"
+dataset_type = "Athan mixed 900"
+
 
 # find the top1 of max_iptm
 def calc_top1_success_rate(df):
@@ -43,8 +49,8 @@ def calc_top123_success_rate(df, order, metric=["max","avg"]):
     return top3_success_rate
 
 
-ref_df = pd.read_csv(ref_path)
-after_20210930_date_lst = ref_df["name"].tolist()
+# ref_df = pd.read_csv(ref_path)
+# after_20210930_date_lst = ref_df["name"].tolist()
 
 
 result_df = pd.read_csv(input_path)
@@ -57,19 +63,19 @@ result_df["possible_combination_counts"]=result_df.groupby("name")["name"].trans
 
 print(f"{dataset_type}")
 
-# calculate success rate based on number of A chains in homo-oligomer
-for i in range(2,51):
-    df = result_df[result_df["correct_count"]==i]
-    success_rate = calc_top1_success_rate(df)
-    print(f"For protein with {i} possible combinations, the success rate is: {success_rate}")
+# # calculate success rate based on number of A chains in homo-oligomer
+# for i in range(2,51):
+#     df = result_df[result_df["correct_count"]==i]
+#     success_rate = calc_top1_success_rate(df)
+#     print(f"For protein with {i} possible combinations, the success rate is: {success_rate}")
 
-# # calc top1 sucess rate based on max_iptm
-# max_top1_success_rate = calc_top123_success_rate(result_df, 1, "max")
-# print(f"Top 1 max_iptm success rate: {max_top1_success_rate}")
+# calc top1 sucess rate based on max_iptm
+max_top1_success_rate = calc_top123_success_rate(result_df, 1, "max")
+print(f"Top 1 max_iptm success rate: {max_top1_success_rate}")
 
-# # # get top1 iptm success rate based on max_iptm
-# # top1_max_iptm_success_rate = calc_top1_success_rate(result_df)
-# # print(f"AAB: Top 1 max_iptm success rate: {top1_max_iptm_success_rate}")
+# get top1 iptm success rate based on max_iptm
+top1_max_iptm_success_rate = calc_top1_success_rate(result_df)
+print(f"Athan mixed 900: Top 1 max_iptm success rate: {top1_max_iptm_success_rate}")
 
 # # get top1 iptm success rate based on avg_iptm
 # top1_avg_iptm_success_rate = calc_top123_success_rate(result_df, 1, "avg")

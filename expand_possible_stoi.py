@@ -21,8 +21,8 @@ from tqdm import tqdm
 # output_path = "/lustre/grp/gyqlab/wangpx/data/StoPred_data/valid_dataset_protenix_AAB_complex.json"
 
 # for athan proteins
-input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_with_msa/athan_900_short_protein_complexes-update-msa.json"
-output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_athan_900_mixed_proteins.json"
+input_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/json_with_msa/uniprot_homodimer_protein_complexes-update-msa.json"
+output_path = "/storage/gaoyiqinLab/wangpeixin/data/data_1/intermediate_data/protenix_input_json/protenix_homodimer_athan_mixed_proteins.json"
 # for uniprot dimer
 ### remember to remove AMINO_ACID_LEN_LIMIT
 
@@ -32,7 +32,10 @@ def expand_possible_stoi(s_lens):
     possible_combinations=[]
     
     if len(s_lens) == 1: 
-        size = AMINO_ACID_LEN_LIMIT//s_lens[0]
+        if s_lens[0] <= 500:
+            size = AMINO_ACID_LEN_LIMIT//s_lens[0]
+        else:
+            size = 2
         for i in range(size):
             possible_combinations+=[[i+1]]
     elif len(s_lens) == 2:
